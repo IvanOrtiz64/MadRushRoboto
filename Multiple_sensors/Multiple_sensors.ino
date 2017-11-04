@@ -1,68 +1,74 @@
-#include "Adafruit_VL53L0X.h"
+#include "DistanceFlightSensors.h"
 
-int distanceShutDownPins[] = {52,53};
-Adafruit_VL53L0X distanceSensors[2];
-int numberOfDistanceSensors = (sizeof(distanceShutDownPins)/sizeof(int));
+#define FRONT_SENSOR_SHUTDOWN_PIN 49
+#define LEFT_SENSOR_SHUTDOWN_PIN 53
+#define RIGHT_SENSOR_SHUTDOWN_PIN 51
+#define TOP_SENSOR_SHUTDOWN_PIN 47
+
+
+Adafruit_VL53L0X FRONT_SENSOR = Adafruit_VL53L0X();
+Adafruit_VL53L0X LEFT_SENSOR = Adafruit_VL53L0X();
+Adafruit_VL53L0X RIGHT_SENSOR = Adafruit_VL53L0X();
+Adafruit_VL53L0X TOP_SENSOR = Adafruit_VL53L0X();
+DistanceFlightSensors sensors(&FRONT_SENSOR,&LEFT_SENSOR,&RIGHT_SENSOR,&TOP_SENSOR);
 
 void setup() {
   Serial.begin(115200);
-  setDistanceSensors(distanceShutDownPins,distanceSensors);
-  
+  pinMode(FRONT_SENSOR_SHUTDOWN_PIN,OUTPUT);
+  pinMode(LEFT_SENSOR_SHUTDOWN_PIN,OUTPUT);
+  pinMode(RIGHT_SENSOR_SHUTDOWN_PIN,OUTPUT);
+  pinMode(TOP_SENSOR_SHUTDOWN_PIN,OUTPUT);
+  setDistanceSensors();  
 }
 
 
 void loop() {
     
   Serial.println("Reading a measurement... ");
-   
-  Serial.print("number of sensors ");  Serial.println(numberOfDistanceSensors);
-  for(int i=0; i<numberOfDistanceSensors; i++){
-    VL53L0X_RangingMeasurementData_t measure;
-    distanceSensors[i].rangingTest(&measure, false); // pass in 'true' to get debug data printout!
 
-    if (measure.RangeStatus != 4) {  // phase failures have incorrect data
-      Serial.print("Sensor "); Serial.print(i); Serial.print(" Distance (mm): "); Serial.println(measure.RangeMilliMeter);
-    } 
-    else {
-       Serial.print("Sensor "); Serial.print(i); Serial.println(" out of range ");
-    }
-     delay(100);
-  }    
+  uint16_t distance = sensors.getDistanceFromTopSensor();
+  Serial.print("Top Sensor "); Serial.print(" Distance (mm): "); Serial.println(distance);
+
+  distance = sensors.getDistanceFromLeftSensor();
+  Serial.print("Left Sensor "); Serial.print(" Distance (mm): "); Serial.println(distance);
+
+  distance = sensors.getDistanceFromRightSensor();
+  Serial.print("Right Sensor "); Serial.print(" Distance (mm): "); Serial.println(distance);
+
+  distance = sensors.getDistanceFromFrontSensor();
+  Serial.print("Front Sensor "); Serial.print(" Distance (mm): "); Serial.println(distance);
+
+  delay(2000);
+  
 }
 
-//This method will set the pinmode to output and set all sensors
-void reSettingAllDistanceSensors(int shutDownPins[]){
-  
-  for(int i=0; i<numberOfDistanceSensors; i++){
-    pinMode(shutDownPins[i],OUTPUT);
-    digitalWrite(shutDownPins[i],LOW);
-  }
+void setDistanceSensors(){
+  digitalWrite(FRONT_SENSOR_SHUTDOWN_PIN,LOW);
+  digitalWrite(LEFT_SENSOR_SHUTDOWN_PIN,LOW);
+  digitalWrite(RIGHT_SENSOR_SHUTDOWN_PIN,LOW);
+  digitalWrite(TOP_SENSOR_SHUTDOWN_PIN,LOW);
+
   delay(10);
-  for(int i=0; i<numberOfDistanceSensors; i++){
-    digitalWrite(shutDownPins[i],HIGH);
-  }
-}
 
-//Getting the list of sensors ready for setting their address
-void placingAllButFirstShutDownPinToLow(int shutDownPins[]){
-  for(int i=1; i<numberOfDistanceSensors; i++){
-    digitalWrite(shutDownPins[i],LOW);
-  }
-}
+  digitalWrite(FRONT_SENSOR_SHUTDOWN_PIN,HIGH);
+  digitalWrite(LEFT_SENSOR_SHUTDOWN_PIN,HIGH);
+  digitalWrite(RIGHT_SENSOR_SHUTDOWN_PIN,HIGH);
+  digitalWrite(TOP_SENSOR_SHUTDOWN_PIN,HIGH);
 
-void setDistanceSensors(int shutDownPins[],Adafruit_VL53L0X sensors[]){
-  reSettingAllDistanceSensors(shutDownPins);
-  placingAllButFirstShutDownPinToLow(shutDownPins);
+  digitalWrite(LEFT_SENSOR_SHUTDOWN_PIN,LOW);
+  digitalWrite(RIGHT_SENSOR_SHUTDOWN_PIN,LOW);
+  digitalWrite(TOP_SENSOR_SHUTDOWN_PIN,LOW);
+
+  FRONT_SENSOR.begin(0x30);
   
-  byte address = 0x30;
-  
-  for(int i=0; i<numberOfDistanceSensors; i++){
-    digitalWrite(shutDownPins[i],HIGH);
-    Adafruit_VL53L0X sensor = Adafruit_VL53L0X();
-    sensor.begin(address);
-    address++;
-    sensors[i] = sensor;
-  }
+  digitalWrite(LEFT_SENSOR_SHUTDOWN_PIN,HIGH);
+  LEFT_SENSOR.begin(0x31);
+
+  digitalWrite(RIGHT_SENSOR_SHUTDOWN_PIN,HIGH);
+  RIGHT_SENSOR.begin(0x32);
+
+  digitalWrite(TOP_SENSOR_SHUTDOWN_PIN,HIGH);
+  TOP_SENSOR.begin(0x33);
 }
 
 
