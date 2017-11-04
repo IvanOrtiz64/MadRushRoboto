@@ -1,8 +1,10 @@
 #include <Servo.h>
+#include <Driver.h>
 
 /*
-/Servo variables initializing
-*/
+ * Servo variables initializing
+ */
+Driver driver;
 Servo myservo;  // create servo object to control a servo
 int pos = 0;    // variable used to update the servo position
 
@@ -43,5 +45,24 @@ void swingSaidDongGonger(){
     delay(150);  
     Serial.println("reverse positoin: "); Serial.println(pos);// waits 150ms for the servo to reach the position
   }
+}
+
+void leftHandRule(){
+  /*
+   * left hand rule
+   * if you can turn left then turn left
+   * else go straight
+   * else turn right
+   */
+   if(frontSensorDistance<=10){
+      if(leftSensorDistance>10){
+        driver.goLeft();
+      }else if(frontSensorDistance>10){
+        driver.goStraight();
+      }
+      else{
+        driver.goRight();
+      }
+    }
 }
 
