@@ -13,7 +13,7 @@ Adafruit_VL53L0X TOP_SENSOR = Adafruit_VL53L0X();
 DistanceFlightSensors sensors(&FRONT_SENSOR,&LEFT_SENSOR,&RIGHT_SENSOR,&TOP_SENSOR);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(FRONT_SENSOR_SHUTDOWN_PIN,OUTPUT);
   pinMode(LEFT_SENSOR_SHUTDOWN_PIN,OUTPUT);
   pinMode(RIGHT_SENSOR_SHUTDOWN_PIN,OUTPUT);

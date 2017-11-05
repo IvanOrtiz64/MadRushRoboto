@@ -18,7 +18,6 @@ uint16_t DistanceFlightSensors::getDistanceFromTopSensor(){
    if (measure.RangeStatus != 4){  // phase failures have incorrect data
          distance = measure.RangeMilliMeter;
    } 
-   delay(100);
    return distance;
 }
 
@@ -32,7 +31,6 @@ uint16_t DistanceFlightSensors::getDistanceFromLeftSensor(){
    if (measure.RangeStatus != 4){  // phase failures have incorrect data
          distance = measure.RangeMilliMeter;
    } 
-   delay(100);
    return distance;
 }
 
@@ -46,7 +44,6 @@ uint16_t DistanceFlightSensors::getDistanceFromRightSensor(){
   if (measure.RangeStatus != 4){  // phase failures have incorrect data
          distance = measure.RangeMilliMeter;
   } 
-  delay(100);
   return distance;
 }
 
@@ -60,7 +57,6 @@ uint16_t DistanceFlightSensors::getDistanceFromFrontSensor(){
   if (measure.RangeStatus != 4){  // phase failures have incorrect data
          distance = measure.RangeMilliMeter;
   } 
-  delay(100);
   return distance;
 }
 

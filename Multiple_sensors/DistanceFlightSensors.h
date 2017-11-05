@@ -13,6 +13,4 @@ class DistanceFlightSensors{
     uint16_t getDistanceFromLeftSensor();
     uint16_t getDistanceFromRightSensor();
     uint16_t getDistanceFromFrontSensor();
-    
-  
 };
