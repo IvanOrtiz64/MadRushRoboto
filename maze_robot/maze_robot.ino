@@ -1,5 +1,4 @@
 #include<DistanceSensor.h>
-#include "DistanceFlightSensors.h"
 #include "Driver.h"
 
 #define FRONT_SENSOR_SHUTDOWN_PIN 49
@@ -16,7 +15,7 @@
 // Minimum stopping distance in CM
 long STOP_DISTANCE_THRESHOLD = 10;
 
-uint16_t STOP_DISTANCE_FLIGHT_THRESHOLD = 20;
+uint16_t STOP_DISTANCE_FLIGHT_THRESHOLD = 250;
 
 
 uint16_t frontDistance = 0;
@@ -29,18 +28,7 @@ Adafruit_VL53L0X LEFT_SENSOR = Adafruit_VL53L0X();
 Adafruit_VL53L0X RIGHT_SENSOR = Adafruit_VL53L0X();
 Adafruit_VL53L0X TOP_SENSOR = Adafruit_VL53L0X();
 DistanceFlightSensors sensors(&FRONT_SENSOR,&LEFT_SENSOR,&RIGHT_SENSOR,&TOP_SENSOR);
-
-
-//// Motor A PWM Pins
-//int MOTOR_A_CH_1 = 3;
-//int MOTOR_A_CH_2 = 4;
-//
-//// Motor B PWM Pins
-//int MOTOR_B_CH_1 = 5;
-//int MOTOR_B_CH_2 = 6;
-
-Driver driver (MOTOR_A_CH_1,MOTOR_A_CH_2,MOTOR_B_CH_1,MOTOR_B_CH_2);
-
+Driver driver (MOTOR_A_CH_1,MOTOR_A_CH_2,MOTOR_B_CH_1,MOTOR_B_CH_2,&sensors);
 // Sensor
 DistanceSensor sensor(12, 13);
 
@@ -49,7 +37,8 @@ boolean turningLeft = false;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(115200);
+  Serial3.begin(9600);
 
   pinMode(MOTOR_A_CH_1, OUTPUT);
   pinMode(MOTOR_A_CH_2, OUTPUT);
@@ -65,41 +54,47 @@ void setup() {
 
 void loop() {
 
+  //driver.goLeft();
+  
   topDistance = sensors.getDistanceFromTopSensor();
   Serial.print("Top Sensor "); Serial.print(" Distance (mm): "); Serial.println(topDistance);
+  Serial3.print("Top Sensor "); Serial3.print(" Distance (mm): "); Serial3.println(topDistance);
+
+  //delay(5000);
 
   leftDistance = sensors.getDistanceFromLeftSensor();
   Serial.print("Left Sensor "); Serial.print(" Distance (mm): "); Serial.println(leftDistance);
+  Serial3.print("Left Sensor "); Serial3.print(" Distance (mm): "); Serial3.println(leftDistance);
+  
+  //delay(5000);
 
   rightDistance = sensors.getDistanceFromRightSensor();
   Serial.print("Right Sensor "); Serial.print(" Distance (mm): "); Serial.println(rightDistance);
+  Serial3.print("Right Sensor "); Serial3.print(" Distance (mm): "); Serial3.println(rightDistance);
+
+   //delay(5000);
 
   frontDistance = sensors.getDistanceFromFrontSensor();
   Serial.print("Front Sensor "); Serial.print(" Distance (mm): "); Serial.println(frontDistance);
-
-  delay(2000);
-
-  if(needToTurn){
-    if(turningLeft || leftDistance==0 || leftDistance>rightDistance){
-      driver.goLeft();
-      turningLeft = true;
-    }
-    else{
-      driver.goRight();
-      turningLeft = false;
-    }
-    
-  }
+  Serial3.print("Front Sensor "); Serial3.print(" Distance (mm): "); Serial3.println(frontDistance);
 
   if(frontDistance>=1 && frontDistance<=STOP_DISTANCE_FLIGHT_THRESHOLD){
       driver.halt();
-      needToTurn = true;    
+      needToTurn = true;
+      if(leftDistance==0 || leftDistance>rightDistance || turningLeft){
+          driver.goLeft();
+          turningLeft = true;
+      }
+      else{
+          driver.goRight();
+          turningLeft = false;
+      }
   }
   else{
     needToTurn = false;
     turningLeft = false;
-    if(frontDistance>255){
-        driver.goFoward(255);
+    if(frontDistance>200){
+        driver.goFoward(200);
     }
     else if(frontDistance<=100){
         driver.goFoward(100);
@@ -107,7 +102,6 @@ void loop() {
     else{
       driver.goFoward(frontDistance);
     }
-    
   }
 }
 
@@ -139,57 +133,3 @@ void setDistanceSensors(){
   digitalWrite(TOP_SENSOR_SHUTDOWN_PIN,HIGH);
   TOP_SENSOR.begin(0x33);
 }
-
-//// Forward
-//void motorDriveReverse(int speed, int time) {
-//  analogWrite(MOTOR_A_CH_1, speed + 12);
-//  analogWrite(MOTOR_A_CH_2, 0);
-//
-//  analogWrite(MOTOR_B_CH_1, speed);
-//  analogWrite(MOTOR_B_CH_2, 0);
-//
-//  delay(time);
-//}
-//
-//// Reverse 
-//void motorDriveForward(int speed, int time) {
-//  analogWrite(MOTOR_A_CH_1, 0);
-//  analogWrite(MOTOR_A_CH_2, speed + 12);
-//
-//  analogWrite(MOTOR_B_CH_1, 0);
-//  analogWrite(MOTOR_B_CH_2, speed);
-//
-//  delay(time);
-//}
-//
-//// Stop
-//void motorDriveStop(int time) {
-//  analogWrite(MOTOR_A_CH_1, 0);
-//  analogWrite(MOTOR_A_CH_2, 0);
-//
-//  analogWrite(MOTOR_B_CH_1, 0);
-//  analogWrite(MOTOR_B_CH_2, 0);
-//
-//  delay(time);
-//}
-//
-//// Turn Left
-//void motorDriveTurnLeft(int speed, int time) {
-//  analogWrite(MOTOR_A_CH_1, speed);
-//  analogWrite(MOTOR_A_CH_2, 0);
-//
-//  analogWrite(MOTOR_B_CH_1, 0);
-//  analogWrite(MOTOR_B_CH_2, 0);
-//
-//  delay(time);
-//}
-//
-//// Turn Right
-//void motorDriveTurnRight(int speed, int time) {
-//  analogWrite(MOTOR_A_CH_1, 0);
-//  analogWrite(MOTOR_A_CH_2, 0);
-//
-//  analogWrite(MOTOR_B_CH_1, speed);
-//  analogWrite(MOTOR_B_CH_2, 0);
-//  delay(time);
-//}

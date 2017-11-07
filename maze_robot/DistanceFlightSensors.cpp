@@ -50,7 +50,7 @@ uint16_t DistanceFlightSensors::getDistanceFromRightSensor(){
 uint16_t DistanceFlightSensors::getDistanceFromFrontSensor(){
   VL53L0X_RangingMeasurementData_t measure;
   
-  TOP_SENSOR -> rangingTest(&measure, false); // pass in 'true' to get debug data printout!
+  FRONT_SENSOR -> rangingTest(&measure, false); // pass in 'true' to get debug data printout!
 
   uint16_t distance = 0;
     

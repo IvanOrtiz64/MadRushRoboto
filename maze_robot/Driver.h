@@ -1,4 +1,4 @@
-
+#include "DistanceFlightSensors.h"
 class Driver{
 
   private:
@@ -11,10 +11,13 @@ class Driver{
     int MOTOR_B_CH_2;
 
     // motor speed
-    int TURNING_SPEED;
+    int TURNING_SPEED = 100;
+    DistanceFlightSensors* SENSORS;
+        
+
 
   public:
-  Driver(int motorAlphaCh1, int motorAlphaCh2, int motorBetaCh1, int motorBetaCh2);
+  Driver(int motorAlphaCh1, int motorAlphaCh2, int motorBetaCh1, int motorBetaCh2, DistanceFlightSensors *sensors);
   void goFoward(int motorSpeed);
   void goBackward(int motorSpeed);
   void goLeft();
