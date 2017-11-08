@@ -78,7 +78,11 @@ void loop() {
   Serial.print("Front Sensor "); Serial.print(" Distance (mm): "); Serial.println(frontDistance);
   Serial3.print("Front Sensor "); Serial3.print(" Distance (mm): "); Serial3.println(frontDistance);
 
-  if(frontDistance>=1 && frontDistance<=STOP_DISTANCE_FLIGHT_THRESHOLD){
+  int currentCase = driver.goFowardUntilIntersection();
+  Serial.println(currentCase);
+  delay(2000);
+
+  /*if(frontDistance>=1 && frontDistance<=STOP_DISTANCE_FLIGHT_THRESHOLD){
       driver.halt();
       needToTurn = true;
       if(leftDistance==0 || leftDistance>rightDistance || turningLeft){
@@ -93,16 +97,8 @@ void loop() {
   else{
     needToTurn = false;
     turningLeft = false;
-    if(frontDistance>200){
-        driver.goFoward(200);
-    }
-    else if(frontDistance<=100){
-        driver.goFoward(100);
-    }
-    else{
-      driver.goFoward(frontDistance);
-    }
-  }
+    driver.goFoward();
+  }*/
 }
 
 void setDistanceSensors(){
