@@ -162,6 +162,8 @@ void Driver::goLeft(){
 
   analogWrite(MOTOR_B_CH_1, 0);
   analogWrite(MOTOR_B_CH_2, TURNING_SPEED);
+  delay(50);
+  halt();
 }
 
 void Driver::goRight(){
@@ -170,6 +172,8 @@ void Driver::goRight(){
 
   analogWrite(MOTOR_B_CH_1, TURNING_SPEED);
   analogWrite(MOTOR_B_CH_2, 0);
+  delay(50);
+  halt();
 }
 
 void Driver::halt(){
