@@ -1,4 +1,3 @@
-#include<DistanceSensor.h>
 #include "Driver.h"
 
 #define FRONT_SENSOR_SHUTDOWN_PIN 49
@@ -27,10 +26,11 @@ Adafruit_VL53L0X FRONT_SENSOR = Adafruit_VL53L0X();
 Adafruit_VL53L0X LEFT_SENSOR = Adafruit_VL53L0X();
 Adafruit_VL53L0X RIGHT_SENSOR = Adafruit_VL53L0X();
 Adafruit_VL53L0X TOP_SENSOR = Adafruit_VL53L0X();
-DistanceFlightSensors sensors(&FRONT_SENSOR,&LEFT_SENSOR,&RIGHT_SENSOR,&TOP_SENSOR);
+DistanceSensor ultrasonicSensor(12, 13);
+DistanceFlightSensors sensors(&FRONT_SENSOR,&LEFT_SENSOR,&RIGHT_SENSOR,&TOP_SENSOR,&ultrasonicSensor);
 Driver driver (MOTOR_A_CH_1,MOTOR_A_CH_2,MOTOR_B_CH_1,MOTOR_B_CH_2,&sensors);
 // Sensor
-DistanceSensor sensor(12, 13);
+
 
 boolean needToTurn = false;
 boolean turningLeft = false;
@@ -78,9 +78,32 @@ void loop() {
   Serial.print("Front Sensor "); Serial.print(" Distance (mm): "); Serial.println(frontDistance);
   Serial3.print("Front Sensor "); Serial3.print(" Distance (mm): "); Serial3.println(frontDistance);
 
+  long distanceCm = ultrasonicSensor.getDistance(true);
+  Serial.print("Ultrasonic Sensor "); Serial.print(" Distance (cm): "); Serial.println(distanceCm);
+  Serial3.print("Ultrasonic Sensor "); Serial3.print(" Distance (cm): "); Serial3.println(distanceCm);
+
+  Serial3.println("");
+  Serial3.println("");
+  Serial3.println("");
+  delay(5000);
+  
+  /*driver.goLeft();
+  driver.halt();
+  delay(500);
+  driver.goRight();*/
+
+  /*driver.enterMaze();
+
   int currentCase = driver.goFowardUntilIntersection();
   Serial.println(currentCase);
-  delay(2000);
+  Serial3.print("Intersection reached "); Serial3.print(" case number: "); Serial3.println(currentCase);
+
+  driver.exitMaze();
+
+  while(true){
+    // do nothing
+  }/*
+ 
 
   /*if(frontDistance>=1 && frontDistance<=STOP_DISTANCE_FLIGHT_THRESHOLD){
       driver.halt();

@@ -18,8 +18,6 @@ class Driver{
     uint16_t STOP_DISTANCE_FLIGHT_THRESHOLD = 250; // in mm
     boolean isLeftSideIsLonger();
         
-
-
   public:
   Driver(int motorAlphaCh1, int motorAlphaCh2, int motorBetaCh1, int motorBetaCh2, DistanceFlightSensors *sensors);
   void goFoward();
@@ -29,4 +27,8 @@ class Driver{
   void halt();
   void setStopDistance(uint16_t stopDistance);
   int goFowardUntilIntersection();
+  void enterMaze();
+  void exitMaze();
+  void goToGong();
+  
 };

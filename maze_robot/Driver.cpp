@@ -9,9 +9,7 @@ Driver::Driver(int motorAlphaCh1, int motorAlphaCh2, int motorBetaCh1, int motor
     MOTOR_B_CH_1 = motorBetaCh1;
     MOTOR_B_CH_2 = motorBetaCh2;
 
-    SENSORS = sensors;
-    
-    
+    SENSORS = sensors; 
 }
 
 void Driver:: setStopDistance(uint16_t stopDistance){
@@ -47,20 +45,24 @@ boolean Driver::isLeftSideIsLonger(){
 // return 4 = robot can do both a right or go straight
 // return 5 = robot can do both a left turn, and go straight
 // return 6 = robot can do both a left turn, right turn, or can go straight
+// return 7 = robot found the exit
 int Driver:: goFowardUntilIntersection(){
   uint16_t frontDistance = 0;
   uint16_t leftDistance = 0;
   uint16_t rightDistance = 0;
+  uint16_t topDistance = 0;
   boolean keepDriving = true;
   boolean ableToTurnLeft = false;
   boolean ableToTurnRight = false;
   boolean ableToMoveFoward = true;
+  boolean roofDetected = false;
   int currentCase = -1;
   
   while(keepDriving){
     frontDistance = SENSORS->getDistanceFromFrontSensor();
     leftDistance = SENSORS->getDistanceFromLeftSensor();
     rightDistance = SENSORS->getDistanceFromRightSensor();
+    topDistance = SENSORS->getDistanceFromTopSensor();
     
     if(frontDistance>=1 && frontDistance <= STOP_DISTANCE_FLIGHT_THRESHOLD){
       halt();
@@ -80,12 +82,20 @@ int Driver:: goFowardUntilIntersection(){
        ableToTurnRight = true;
     }
 
+    if(topDistance>=1 && topDistance <=100 ){
+      halt();
+      keepDriving = false;
+      roofDetected = true;
+    }
+
     if(keepDriving){
       goFoward();
     }
   }
-
-  if(ableToMoveFoward && ableToTurnLeft && ableToTurnRight){
+  if(roofDetected){
+    currentCase = 7;
+  }
+  else if(ableToMoveFoward && ableToTurnLeft && ableToTurnRight){
     currentCase = 6;
   }
   else if(ableToMoveFoward && ableToTurnLeft){
@@ -108,6 +118,53 @@ int Driver:: goFowardUntilIntersection(){
   }
 
   return currentCase;
+}
+
+void Driver::enterMaze(){
+  uint16_t leftDistance = 0;
+  uint16_t rightDistance = 0;
+  boolean keepDriving = true;
+  while(keepDriving){
+    leftDistance = SENSORS->getDistanceFromLeftSensor();
+    rightDistance = SENSORS->getDistanceFromRightSensor();
+
+    if((leftDistance==1 || leftDistance<=250) && (rightDistance==1 || rightDistance <=250 )){
+      halt();
+      keepDriving = false;
+    }
+
+    if(keepDriving){
+      goFoward();
+    }
+  } 
+}
+
+void Driver::goToGong(){
+  //first check using the distance light sensor
+}
+
+void Driver::exitMaze(){
+    uint16_t frontDistance = 0;
+    uint16_t topDistance = 0;
+    boolean keepDriving = true;
+    while(keepDriving){
+      
+      frontDistance = SENSORS->getDistanceFromFrontSensor();
+      topDistance = SENSORS->getDistanceFromTopSensor();
+      if(topDistance==0 || topDistance>100){
+        halt();
+        keepDriving = false;
+      }
+
+      if(frontDistance>=1 && frontDistance <= 75){
+        halt();
+        keepDriving = false;
+      }
+
+      if(keepDriving){
+        goFoward();
+      }
+    }
 }
 
 int Driver::calculateDrivingSpeed(){
@@ -134,10 +191,10 @@ void Driver::goFoward(){
 
   if(isLeftSideIsLonger()){
     rightMotorSpeed = motorSpeed;
-    leftMotorSpeed = motorSpeed - 5;
+    leftMotorSpeed = motorSpeed - 3;
   }
   else{
-    rightMotorSpeed = motorSpeed - 5;
+    rightMotorSpeed = motorSpeed - 3;
     leftMotorSpeed = motorSpeed;
   }
   
@@ -162,7 +219,7 @@ void Driver::goLeft(){
 
   analogWrite(MOTOR_B_CH_1, 0);
   analogWrite(MOTOR_B_CH_2, TURNING_SPEED);
-  delay(50);
+  delay(450);
   halt();
 }
 
@@ -172,7 +229,7 @@ void Driver::goRight(){
 
   analogWrite(MOTOR_B_CH_1, TURNING_SPEED);
   analogWrite(MOTOR_B_CH_2, 0);
-  delay(50);
+  delay(500);
   halt();
 }
 

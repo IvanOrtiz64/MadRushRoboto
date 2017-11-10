@@ -1,12 +1,12 @@
 #include "DistanceFlightSensors.h"
 
-DistanceFlightSensors :: DistanceFlightSensors(Adafruit_VL53L0X *frontSensor, Adafruit_VL53L0X *leftSensor, Adafruit_VL53L0X *rightSensor, Adafruit_VL53L0X *topSensor){
+DistanceFlightSensors :: DistanceFlightSensors(Adafruit_VL53L0X *frontSensor, Adafruit_VL53L0X *leftSensor, Adafruit_VL53L0X *rightSensor, Adafruit_VL53L0X *topSensor,DistanceSensor *ultrasonicSensor){
   FRONT_SENSOR = frontSensor;
   LEFT_SENSOR = leftSensor;
   RIGHT_SENSOR = rightSensor;
   TOP_SENSOR = topSensor;
+  ULTRASONIC_SENSOR = ultrasonicSensor;
 }
-
 
 uint16_t DistanceFlightSensors::getDistanceFromTopSensor(){
   VL53L0X_RangingMeasurementData_t measure;
@@ -58,6 +58,10 @@ uint16_t DistanceFlightSensors::getDistanceFromFrontSensor(){
          distance = measure.RangeMilliMeter;
   } 
   return distance;
+}
+
+long DistanceFlightSensors::getDistanceFromUltrasonicSensor(){
+  return ULTRASONIC_SENSOR->getDistance(true);
 }
 
 
