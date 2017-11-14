@@ -29,6 +29,7 @@ class Driver{
   int goFowardUntilIntersection();
   void enterMaze();
   void exitMaze();
-  void goToGong();
+  void swing(int reps);
+  
   
 };

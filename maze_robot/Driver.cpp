@@ -51,6 +51,7 @@ int Driver:: goFowardUntilIntersection(){
   uint16_t leftDistance = 0;
   uint16_t rightDistance = 0;
   uint16_t topDistance = 0;
+  long frontUltrasonicSensor = 0;
   boolean keepDriving = true;
   boolean ableToTurnLeft = false;
   boolean ableToTurnRight = false;
@@ -63,12 +64,19 @@ int Driver:: goFowardUntilIntersection(){
     leftDistance = SENSORS->getDistanceFromLeftSensor();
     rightDistance = SENSORS->getDistanceFromRightSensor();
     topDistance = SENSORS->getDistanceFromTopSensor();
+    frontUltrasonicSensor = SENSORS->getDistanceFromUltrasonicSensor();
     
     if(frontDistance>=1 && frontDistance <= STOP_DISTANCE_FLIGHT_THRESHOLD){
       halt();
       keepDriving = false;
       ableToMoveFoward = false;
     }
+
+//    if(frontUltrasonicSensor>=1 && frontUltrasonicSensor<=13){
+//      halt();
+//      keepDriving = false;
+//      ableToMoveFoward = false;
+//    }
     
     if(leftDistance==0 || leftDistance > 250){
       halt();
@@ -82,7 +90,7 @@ int Driver:: goFowardUntilIntersection(){
        ableToTurnRight = true;
     }
 
-    if(topDistance>=1 && topDistance <=100 ){
+    if(topDistance > 30 && topDistance < 150 ){
       halt();
       keepDriving = false;
       roofDetected = true;
@@ -128,7 +136,7 @@ void Driver::enterMaze(){
     leftDistance = SENSORS->getDistanceFromLeftSensor();
     rightDistance = SENSORS->getDistanceFromRightSensor();
 
-    if((leftDistance==1 || leftDistance<=250) && (rightDistance==1 || rightDistance <=250 )){
+    if((leftDistance>=1 && leftDistance<=250) && (rightDistance>=1 && rightDistance <= 250 )){
       halt();
       keepDriving = false;
     }
@@ -137,10 +145,6 @@ void Driver::enterMaze(){
       goFoward();
     }
   } 
-}
-
-void Driver::goToGong(){
-  //first check using the distance light sensor
 }
 
 void Driver::exitMaze(){
@@ -157,6 +161,8 @@ void Driver::exitMaze(){
       }
 
       if(frontDistance>=1 && frontDistance <= 75){
+        goFoward();
+        delay(100);
         halt();
         keepDriving = false;
       }
@@ -182,20 +188,24 @@ int Driver::calculateDrivingSpeed(){
 }
 
 void Driver::goFoward(){
-  int motorSpeed = calculateDrivingSpeed();
+  int motorSpeed = 130; //calculateDrivingSpeed();
   uint16_t leftDistance = SENSORS->getDistanceFromLeftSensor();
   uint16_t rightDistance = SENSORS->getDistanceFromRightSensor();
 
   int rightMotorSpeed = 0;
   int leftMotorSpeed = 0;
 
-  if(isLeftSideIsLonger()){
-    rightMotorSpeed = motorSpeed;
-    leftMotorSpeed = motorSpeed - 3;
+  if(leftDistance==0 || rightDistance==0 || leftDistance>200 || rightDistance>200){
+    rightMotorSpeed = motorSpeed + 10;
+    leftMotorSpeed = motorSpeed - 10;
+  }
+  else if(isLeftSideIsLonger()){
+    rightMotorSpeed = motorSpeed + 3;
+    leftMotorSpeed = motorSpeed;
   }
   else{
-    rightMotorSpeed = motorSpeed - 3;
-    leftMotorSpeed = motorSpeed;
+    rightMotorSpeed = motorSpeed;
+    leftMotorSpeed = motorSpeed + 10;
   }
   
   analogWrite(MOTOR_A_CH_1, 0);
@@ -213,23 +223,64 @@ void Driver::goBackward(int motorSpeed){
   analogWrite(MOTOR_B_CH_2, 0);
 }
 
-void Driver::goLeft(){
-  analogWrite(MOTOR_A_CH_1, TURNING_SPEED);
-  analogWrite(MOTOR_A_CH_2, 0);
+void Driver::swing(int reps){
+  
+  if(reps > 0){
+    analogWrite(MOTOR_A_CH_1, TURNING_SPEED);
+    analogWrite(MOTOR_A_CH_2, 0);
 
-  analogWrite(MOTOR_B_CH_1, 0);
-  analogWrite(MOTOR_B_CH_2, TURNING_SPEED);
-  delay(450);
+    analogWrite(MOTOR_B_CH_1, 0);
+    analogWrite(MOTOR_B_CH_2, TURNING_SPEED);
+  }
+  else{
+    analogWrite(MOTOR_A_CH_1, 0);
+    analogWrite(MOTOR_A_CH_2, TURNING_SPEED + 25);
+
+    analogWrite(MOTOR_B_CH_1, TURNING_SPEED);
+    analogWrite(MOTOR_B_CH_2, 0);; 
+  }
+}
+
+void Driver::goLeft(){
+  boolean keepTurning = true;
+  uint16_t frontDistance = 0;
+  uint16_t leftDistance = 0;
+  while(keepTurning){
+    analogWrite(MOTOR_A_CH_1, TURNING_SPEED);
+    analogWrite(MOTOR_A_CH_2, 0);
+
+    analogWrite(MOTOR_B_CH_1, 0);
+    analogWrite(MOTOR_B_CH_2, TURNING_SPEED);
+
+    frontDistance = SENSORS->getDistanceFromFrontSensor();
+    //leftDistance = SENSORS->getDistanceFromLeftSensor();
+
+    if((frontDistance==0 || frontDistance>=STOP_DISTANCE_FLIGHT_THRESHOLD)){
+      keepTurning = false;
+    }
+  }
   halt();
 }
 
 void Driver::goRight(){
-  analogWrite(MOTOR_A_CH_1, 0);
-  analogWrite(MOTOR_A_CH_2, TURNING_SPEED);
+  boolean keepTurning = true;
+  uint16_t frontDistance = 0;
+  uint16_t rightDistance = 0;
+  
+  while(keepTurning){
+    analogWrite(MOTOR_A_CH_1, 0);
+    analogWrite(MOTOR_A_CH_2, TURNING_SPEED + 25);
 
-  analogWrite(MOTOR_B_CH_1, TURNING_SPEED);
-  analogWrite(MOTOR_B_CH_2, 0);
-  delay(500);
+    analogWrite(MOTOR_B_CH_1, TURNING_SPEED);
+    analogWrite(MOTOR_B_CH_2, 0);
+
+    frontDistance = SENSORS->getDistanceFromFrontSensor();
+    //rightDistance = SENSORS->getDistanceFromRightSensor();
+
+    if((frontDistance==0 || frontDistance>STOP_DISTANCE_FLIGHT_THRESHOLD)){
+      keepTurning = false;
+    }
+  }
   halt();
 }
 
